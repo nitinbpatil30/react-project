@@ -1,17 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import {createStore, applyMiddleware} from 'redux';
+import {Provider} from 'react-redux';
+import createSagaMiddleware from 'redux-saga';
+import "regenerator-runtime/runtime";
+
+import App from "./app";
+import rootReducer from './reducers/rootReducer';
+import rootSaga from './sagas/rootSaga';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+/***** Add middle ware between redux and componets *****/
+const sagaMiddleware = createSagaMiddleware();
+/***** create centralised cache *****/
+const store = createStore(rootReducer, applyMiddleware(sagaMiddleware));
+/***** run middleware *****/
+sagaMiddleware.run(rootSaga);
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+/***** Wrap redux provider to other components *****/
+ReactDOM.render(<Provider store={store}><App /></Provider>, document.getElementById('root'));
