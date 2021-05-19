@@ -1,10 +1,11 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { Dropdown,Input,Button } from 'semantic-ui-react'
+import { Dropdown,Input,Button,Radio,Table } from 'semantic-ui-react'
 import { productDataWatcher, updateProductData, updateCategoriesData } from '../utilities/actionCreators';
 import { sampleData } from '../utilities/sampleData';
 import Products from "./products";
+import ProductsRow from "./productsRow";
 
 class ProductList extends React.Component {
     constructor(props) {
@@ -14,7 +15,8 @@ class ProductList extends React.Component {
             error: null,
             isLoaded: false,
             searchedName: '',
-            selectedCategory: []
+            selectedCategory: [],
+            selectedView: 'Table'
         };
     }
 
@@ -63,6 +65,11 @@ class ProductList extends React.Component {
 
     handleChangeName = (event) => {
         this.setState({searchedName: event.target.value});
+    }
+
+    handleChangeSlider = (event, {value}) => {
+        let curView = value === 'Cart' ? 'Table' : 'Cart';
+        this.setState({selectedView: curView});
     }
 
     /***** search products button click *****/
@@ -138,16 +145,47 @@ class ProductList extends React.Component {
                                 <Button onClick={this.resetFilters}>Reset</Button>
                             </div>
                         </div>
+                        <div style={{float:"left",paddingRight:"20px"}}>
+                            <div>{this.state.selectedView} view</div>
+                            <div style={{paddingTop:"5px"}}>
+                               <Radio toggle
+                                value={this.state.selectedView}
+                                onChange={this.handleChangeSlider}
+                                />
+                            </div>
+                        </div>
                         <div style={{clear:"both"}} ></div>
                     </div>
                     {/***** Search control bar - end *****/}
                     {/***** products binding - start *****/}
                     <div style={{margin:"10px"}}>
-                        {this.filteredProducts().map(item => (
-                            /***** Child product component *****/
-                            <Products key={item.id} itemData={item} />
-                        ))}
-                        <div style={{clear:"both"}} ></div>
+                        {this.state.selectedView === 'Table'?
+                            <Table celled >
+                                <Table.Header>
+                                    <Table.Row>
+                                        <Table.HeaderCell>Product name</Table.HeaderCell>
+                                        <Table.HeaderCell>Category</Table.HeaderCell>
+                                        <Table.HeaderCell>Price</Table.HeaderCell>
+                                        <Table.HeaderCell>Add to cart</Table.HeaderCell>
+                                        <Table.HeaderCell>Remove from cart</Table.HeaderCell>
+                                    </Table.Row>
+                                </Table.Header>
+                                <Table.Body>
+                                    {this.filteredProducts().map(item => (
+                                        /***** Child product component *****/
+                                        <ProductsRow key={item.id} itemData={item} />
+                                    ))}
+                                </Table.Body>
+                            </Table>
+                        :
+                            <div>
+                                {this.filteredProducts().map(item => (
+                                    /***** Child product component *****/
+                                    <Products key={item.id} itemData={item} />
+                                ))}
+                                <div style={{clear:"both"}} ></div>
+                            </div>
+                        }
                     </div>
                     {/***** products binding - end *****/}
 

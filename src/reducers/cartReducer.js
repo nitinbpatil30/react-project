@@ -1,6 +1,5 @@
 const iState = {
-    cartData:[],
-    checkOutDetails:{}
+    cartData:[]
 }
 
 const cartReducer = (state=iState, action) => {
@@ -9,11 +8,6 @@ const cartReducer = (state=iState, action) => {
             return {
                 ...state,
                 cartData: action.payload
-            };
-        case 'SET_CART_CHECKOUT_DETAILS':
-            return {
-                ...state,
-                checkOutDetails: action.payload
             };
         default:
             return state;

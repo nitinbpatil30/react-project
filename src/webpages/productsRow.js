@@ -1,10 +1,11 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import { bindActionCreators } from 'redux';
+import { Table } from 'semantic-ui-react'
 import { updateCartData } from '../utilities/actionCreators';
 import { calculateTotals, formatNumber } from '../utilities/utility';
 
-class Products extends React.Component {
+class ProductsRow extends React.Component {
 	constructor(props) {
 		super(props);
 
@@ -66,6 +67,7 @@ class Products extends React.Component {
                 cartDataG.push(value);
             }
         }
+
         /***** set global cache *****/
         this.props.updateCartData(cartDataG);
     }
@@ -73,18 +75,13 @@ class Products extends React.Component {
     render() {
         const vState = this.state.itemData;
         return (
-            <div style={{float:"left",width:"200px",margin:"10px 2px",padding:"10px",backgroundColor:"white",border:"1px black solid"}}>
-                <div style={{height:"140px"}}>
-                    <div style={{textAlign:"center"}}><img src="../images/no_image.svg" style={{width:"50px",height:"50px"}} alt="Loading" /></div>
-                    <div><span style={{color: "silver"}}>Name: </span>{vState.name}</div>
-                    <div><span style={{color: "silver"}}>Category: </span>{vState.type}</div>
-                    <div style={{textAlign: "right",paddingTop:"10px"}}>${formatNumber(vState.price)}</div>
-                </div>
-                <div style={{paddingTop:"10px"}}>
-                    <button style={{marginRight:"5px",width:"80px"}} onClick={() => this.addToCart(vState)}>{(vState.quantity === 1 && !vState.existsInCart) ? 'Add' : 'Add more'}</button>
-                    <button style={{width:"80px"}} disabled={!vState.existsInCart} onClick={() => this.removeFromCart(vState)}>Remove</button>
-                </div>
-            </div>
+            <Table.Row>
+                <Table.Cell>{vState.name}</Table.Cell>
+                <Table.Cell>{vState.type}</Table.Cell>
+                <Table.Cell style={{textAlign: "right"}}>${formatNumber(vState.price)}</Table.Cell>
+                <Table.Cell><button style={{width:"80px"}} onClick={() => this.addToCart(vState)}>{(vState.quantity === 1 && !vState.existsInCart) ? 'Add' : 'Add more'}</button></Table.Cell>
+                <Table.Cell><button style={{width:"80px"}} disabled={!vState.existsInCart} onClick={() => this.removeFromCart(vState)}>Remove</button></Table.Cell>
+            </Table.Row>
         );
     }
 }
@@ -103,4 +100,4 @@ const mapDispatchToProps = (dispatch) =>{
     }, dispatch);
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Products);
+export default connect(mapStateToProps, mapDispatchToProps)(ProductsRow);

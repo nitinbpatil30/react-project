@@ -13,7 +13,3 @@ export function updateCategoriesData(profile) {
 export function updateCartData(profile) {
   return { type: 'SET_CART_DATA', payload: profile };
 }
-
-export function updateCartCheckOutDetails(profile) {
-  return { type: 'SET_CART_CHECKOUT_DETAILS', payload: profile };
-}

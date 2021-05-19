@@ -2,8 +2,11 @@ import React from 'react';
 import { Link } from "react-router-dom";
 import {connect} from 'react-redux';
 import { bindActionCreators } from 'redux';
-import { updateCartData, updateCartCheckOutDetails } from '../utilities/actionCreators';
+import { Table } from 'semantic-ui-react'
+import { updateCartData } from '../utilities/actionCreators';
 import { calculateTotals, formatNumber } from '../utilities/utility';
+//import CartItems from './cartItems';
+import CartItemsRow from './cartItemsRow';
 
 class Cart extends React.Component {
 	constructor(props) {
@@ -11,96 +14,40 @@ class Cart extends React.Component {
 		
 		const varMyData = this.props.cartData;
 		this.state = {
-		    cartData: varMyData,
-		    checkOutDetails: calculateTotals(varMyData)
+		    cartData: varMyData
 		};
 	}
-
-    /***** Increase product quantity *****/
-    increaseQuantity = (key) => {
-        let vCartData = this.state.cartData;
-        for (const [index, value] of vCartData.entries()) {
-            if(value.id === key){
-                value.quantity++;
-                break;
-            }
-        }
-
-        /***** calculate checkout details, like total quantity, total price *****/
-        let vCheckOutDetails = calculateTotals(vCartData);
-        this.setState({cartData:vCartData, checkOutDetails: vCheckOutDetails});
-        /***** set global cache *****/
-        this.props.updateCartData(vCartData);
-        this.props.updateCartCheckOutDetails(vCheckOutDetails);
-    }
-
-    /***** Decrease product quantity *****/
-    decreaseQuantity = (key) => {
-        let vCartData = this.state.cartData;
-        for (const [index, value] of vCartData.entries()) {
-            if(value.id === key && value.quantity > 1){
-                value.quantity--;
-                break;
-            }
-        }
-
-        /***** calculate checkout details, like total quantity, total price *****/
-        let vCheckOutDetails = calculateTotals(vCartData);
-        this.setState({cartData:vCartData, checkOutDetails: vCheckOutDetails});
-        /***** set global cache *****/
-        this.props.updateCartData(vCartData);
-        this.props.updateCartCheckOutDetails(vCheckOutDetails);
-    }
-
-    /***** Remove product from cart *****/
-    removeFromCart = (item) => {
-        let newList = [];
-        for (const [index, value] of this.state.cartData.entries()) {
-            if(value.id !== item.id){
-                newList.push(value);
-            }
-        }
-
-        /***** calculate checkout details, like total quantity, total price *****/
-        let vCheckOutDetails = calculateTotals(newList);
-        this.setState({cartData:newList, checkOutDetails: vCheckOutDetails});
-        /***** set global cache *****/
-        this.props.updateCartData(newList);
-        this.props.updateCartCheckOutDetails(vCheckOutDetails);
-    }
 
     /***** Clear all cart Items *****/
     clearCart = () =>{
         this.props.updateCartData([]);
-        this.props.updateCartCheckOutDetails({});
     }
 
     render() {
+        const {tItems, tPrice} = calculateTotals(this.props.cartData);
         return (
             <div style={{margin:"10px"}}>
                 {/***** Cart product details - start *****/}
                 <div style={{float:"left",width:"82%" }} >
-                    {this.state.cartData.length > 0 ? this.state.cartData.map(item => (
-                        /***** Bind cart products *****/
-                        <div key={item.id} style={{padding:"20px",backgroundColor:"white",borderBottom:"1px black solid"}}>
-                            <div style={{float:"left",marginRight:"10px"}}>
-                                <img src="../images/no_image.svg" style={{width:"50px",height:"50px"}} alt="Loading" />
-                            </div>
-                            <div style={{float:"left",marginRight:"10px",width:"50%"}}>
-                                <div>{item.name}</div>
-                                <div>{item.type}</div>
-                                <div style={{fontWeight:"bold"}}>${formatNumber(item.price)}</div>
-                            </div>
-                            <div style={{float:"left",marginRight:"10px"}}>
-                                <div>Qty: <button disabled={item.quantity <= 1} onClick={() => this.decreaseQuantity(item.id)}>-</button>  {item.quantity}  <button onClick={() => this.increaseQuantity(item.id)}>+</button></div>
-                                <div style={{marginTop:"10px"}}>Product(s) total price: <span style={{fontWeight:"bold"}}>${formatNumber(item.price * item.quantity)}</span></div>
-                            </div>
-                            <div style={{float:"right"}}>
-                                <button onClick={() => this.removeFromCart(item)}>Remove product</button>
-                            </div>
-                            <div style={{clear:"both"}}></div>
-                        </div>
-                    ))
+                    {this.props.cartData.length > 0 ?
+                        <Table celled >
+                            <Table.Header>
+                                <Table.Row>
+                                    <Table.HeaderCell>Product name</Table.HeaderCell>
+                                    <Table.HeaderCell>Category</Table.HeaderCell>
+                                    <Table.HeaderCell>Price</Table.HeaderCell>
+                                    <Table.HeaderCell>Quantity</Table.HeaderCell>
+                                    <Table.HeaderCell>Product(s) total price</Table.HeaderCell>
+                                    <Table.HeaderCell>Remove from cart</Table.HeaderCell>
+                                </Table.Row>
+                            </Table.Header>
+                            <Table.Body>
+                                {this.props.cartData.map(item => (
+                                    /***** Child product component *****/
+                                    <CartItemsRow key={item.id} itemData={item} />
+                                ))}
+                            </Table.Body>
+                        </Table>
                     :
                         /***** Show message cart is empty *****/
                         <div style={{backgroundColor:"white",textAlign:"center",minHeight:"125px" }} >Your cart is empty <br/><Link to={{pathname: "/shopping"}} style={{textDecoration: "underline"}}>Continue shopping</Link></div>
@@ -110,12 +57,12 @@ class Cart extends React.Component {
                 {/***** Checkout details - start *****/}
                 <div style={{float:"right",backgroundColor:"white",border:"1px black solid",padding:"10px",width:"15%"  }} >
                     <div>Total products</div>
-                    <div style={{fontWeight:"bold"}}>{this.state.checkOutDetails.tItems}</div>
+                    <div style={{fontWeight:"bold"}}>{tItems}</div>
                     <div style={{marginTop:"10px"}}>Checkout Price</div>
-                    <div style={{fontWeight:"bold"}}>${this.state.checkOutDetails.tPrice}</div>
+                    <div style={{fontWeight:"bold"}}>${tPrice}</div>
                     <div style={{marginTop:"10px"}}>
                         <Link to={{pathname: "/checkOut"}}>
-                            <button disabled={this.state.cartData.length === 0} onClick={()=>this.clearCart()}>Checkout</button>
+                            <button disabled={this.props.cartData.length === 0} onClick={()=>this.clearCart()}>Checkout</button>
                         </Link>
                     </div>
                 </div>
@@ -130,14 +77,13 @@ class Cart extends React.Component {
 //get store
 const mapStateToProps = (state) =>{
     return {
-        cartData: state.rCart.cartData,
-        checkOutDetails: state.rCart.checkOutDetails
+        cartData: state.rCart.cartData
     }
 }
 //set store
 const mapDispatchToProps = (dispatch) =>{
     return bindActionCreators({
-        updateCartData, updateCartCheckOutDetails
+        updateCartData
     }, dispatch);
 }
 
